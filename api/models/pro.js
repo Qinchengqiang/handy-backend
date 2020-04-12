@@ -1,14 +1,14 @@
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
-const availabilitySchema = new Schema({
+const availabilitySchema = Schema({
   startDate: { type: String, required: true },
   startSession: { type: Number, required: true, min: 1, max: 29 },
   endDate: { type: String, required: true },
   endSession: { type: Number, required: true, min: 1, max: 29 },
 });
 
-const ProSchema = new Schema({
+const ProSchema = Schema({
   firstName: { type: String, required: true, lowercase: true },
   lastName: { type: String, required: true, lowercase: true },
   stAddress: { type: String, required: true },
@@ -19,8 +19,8 @@ const ProSchema = new Schema({
   serviceType: { type: String, required: true, lowercase: true },
   availability: [availabilitySchema],
   pwd: { type: String, required: true },
-  bookings: [Schema.Types.ObjectId],
-  orders: [Schema.Types.ObjectId],
+  bookings: [{ type: Schema.Types.ObjectId, ref: "Booking" }],
+  orders: [{ type: Schema.Types.ObjectId, ref: "Order" }],
 });
 
-module.exports = mongoose.model("Pro", ProSchema);
+module.exports = ProSchema;

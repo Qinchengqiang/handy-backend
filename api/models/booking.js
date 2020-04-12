@@ -1,9 +1,13 @@
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
-const BookingSchema = new Schema({
-  customerId: { type: Schema.Types.ObjectId, required: true },
-  proId: { type: Schema.Types.ObjectId, required: true },
+const BookingSchema = Schema({
+  customerId: {
+    type: Schema.Types.ObjectId,
+    required: true,
+    ref: "User",
+  },
+  proId: { type: Schema.Types.ObjectId, required: true, ref: "Pro" },
   bookingDate: { type: Date, required: true },
   startSession: { type: Number, required: true, min: 1, max: 29 },
   endSession: { type: Number, required: true, min: 1, max: 29 },
@@ -11,4 +15,4 @@ const BookingSchema = new Schema({
   feedback: { type: String, trim: true },
 });
 
-module.exports = mongoose.model("Booking", BookingSchema);
+module.exports = BookingSchema;
