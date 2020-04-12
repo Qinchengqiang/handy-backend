@@ -5,6 +5,7 @@ const path = require("path");
 const mongoose = require("mongoose");
 const bodyParser = require("koa-bodyparser");
 const config = require("./api/config");
+const router = require("./api/router");
 
 mongoose.connect(config.db.uri, config.db.options);
 const app = new Koa();
@@ -12,12 +13,12 @@ const app = new Koa();
 app.use(
   oas({
     endpoint: "/openapi.json",
-    file: path.resolve(process.cwd(), "/api", "openapi.yml"),
+    file: path.resolve(process.cwd(), "./api", "openapi.yml"),
     uiEndpoint: "/oas",
     validatePaths: ["/else"],
   })
 );
 
 app.use(bodyParser());
-
+app.use(router.routes());
 app.listen(4000);

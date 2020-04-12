@@ -33,10 +33,12 @@ paths:
                   type: string
                 email:
                   type: string
+                  format: email
                 contactNum:
                   type: string
                 pwd:
                   type: string
+                  format: password
                 stAddress:
                   type: string
                 city:
@@ -51,3 +53,79 @@ paths:
                   type: array
                   items:
                     type: string
+              required:
+                - firstName
+                - lastName
+                - email
+                - contactNum
+                - pwd
+                - stAddress
+                - city
+                - postCode
+  /api/pro:
+    post:
+      summary: Create a single pro
+      description: Create a single pro in db
+      tags:
+        - Pro
+      responses:
+        "201":
+          description: A new pro has been created
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                firstName:
+                  type: string
+                lastName:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                contactNum:
+                  type: string
+                pwd:
+                  type: string
+                  format: password
+                stAddress:
+                  type: string
+                city:
+                  type: string
+                postCode:
+                  type: string
+                bookings:
+                  type: array
+                  items:
+                    type: string
+                orders:
+                  type: array
+                  items:
+                    type: string
+                serviceType:
+                  type: string
+                availability:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      startDate:
+                        type: string
+                        format: date
+                      startSession:
+                        type: number
+                      endDate:
+                        type: string
+                        format: date
+                      endSession:
+                        type: number
+              required:
+                - firstName
+                - lastName
+                - email
+                - contactNum
+                - pwd
+                - stAddress
+                - city
+                - postCode
