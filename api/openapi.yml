@@ -1,0 +1,53 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: Handy App API page
+paths:
+  /:
+    get:
+      summary: home page
+      description: A home page.
+      tags:
+        - Home
+      responses:
+        "200":
+          description: A home page response
+  /api/user:
+    post:
+      summary: Create a single user
+      description: Create a single user in db
+      tags:
+        - User
+      responses:
+        "201":
+          description: A User has been created
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                firstName:
+                  type: string
+                lastName:
+                  type: string
+                email:
+                  type: string
+                contactNum:
+                  type: string
+                pwd:
+                  type: string
+                stAddress:
+                  type: string
+                city:
+                  type: string
+                postCode:
+                  type: string
+                bookings:
+                  type: array
+                  items:
+                    type: string
+                orders:
+                  type: array
+                  items:
+                    type: string
