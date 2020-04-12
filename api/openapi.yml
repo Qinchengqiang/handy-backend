@@ -62,7 +62,7 @@ paths:
                 - stAddress
                 - city
                 - postCode
-  /api/user/orders/{userId}:
+  /api/user/bookings/{userId}:
     get:
       summary: List all of a user's bookings
       description: List all of a given user id's bookings

@@ -2,9 +2,9 @@ const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
 const availabilitySchema = Schema({
-  startDate: { type: String, required: true },
+  startDate: { type: Date, required: true },
   startSession: { type: Number, required: true, min: 1, max: 29 },
-  endDate: { type: String, required: true },
+  endDate: { type: Date, required: true },
   endSession: { type: Number, required: true, min: 1, max: 29 },
 });
 

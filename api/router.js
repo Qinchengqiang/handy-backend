@@ -34,7 +34,7 @@ router.post("/api/user", async (ctx) => {
   } catch (e) {}
 });
 //List all the bookings of a user:
-router.get("/api/user/orders/:userId", async (ctx) => {
+router.get("/api/user/bookings/:userId", async (ctx) => {
   const { userId } = ctx.params;
   //console.log("id is " + id);
   const res = User.findOne({
@@ -51,8 +51,19 @@ router.get("/api/user/orders/:userId", async (ctx) => {
 router.post("/api/pro", async (ctx) => {
   try {
     const body = ctx.request.body;
-    console.log("request body" + JSON.stringify(body));
-    const newPro = new Pro(body);
+    const convertedAvail = body.availability.map((item) => ({
+      startDate: new Date(item.startDate),
+      startSession: item.startSession,
+      endDate: new Date(item.endDate),
+      endSession: item.endSession,
+    }));
+    const proPayload = {
+      ...body,
+      availability: [...convertedAvail],
+    };
+
+    console.log("request body" + JSON.stringify(proPayload));
+    const newPro = new Pro(proPayload);
     const res = await newPro.save();
     ctx.status = 201;
     console.log(res);
@@ -61,6 +72,11 @@ router.post("/api/pro", async (ctx) => {
       id: res._id,
     };
   } catch (e) {}
+});
+//List all available pros with matching service type and time
+router.get("/api/pro/:type/:date", async (ctx) => {
+  let { type, date } = ctx.params;
+  date = new Date(date);
 });
 
 /** API for Booking model
@@ -72,22 +88,38 @@ router.post("/api/pro", async (ctx) => {
 router.post("/api/booking", async (ctx) => {
   try {
     const body = ctx.request.body;
+    const proId = new mongoose.Types.ObjectId(body.proId);
+    const customerId = new mongoose.Types.ObjectId(body.customerId);
+    const bookingDate = new Date(body.bookingDate);
+    /**
+     * TODO validate against pro's availability, then update pro's availability
+     */
+    /* const proAvail = Pro.findOne(
+      {
+            _id: proId,
+            availability: [{
+              
+          }]
+      },
+      {}
+    ); */
     const bookingPayload = {
       ...body,
-      customerId: new mongoose.Types.ObjectId(body.customerId),
-      proId: new mongoose.Types.ObjectId(body.proId),
+      customerId: customerId,
+      proId: proId,
+      bookingDate,
     };
     const newBooking = new Booking(bookingPayload);
     const res = await newBooking.save();
     await User.findOneAndUpdate(
       {
-        _id: new mongoose.Types.ObjectId(body.customerId),
+        _id: customerId,
       },
       { $push: { bookings: res._id } }
     );
     await Pro.findOneAndUpdate(
       {
-        _id: new mongoose.Types.ObjectId(body.customerId),
+        _id: proId,
       },
       { $push: { bookings: res._id } }
     );
@@ -99,4 +131,6 @@ router.post("/api/booking", async (ctx) => {
     };
   } catch (e) {}
 });
+//
+
 module.exports = router;
