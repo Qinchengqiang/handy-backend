@@ -62,22 +62,6 @@ paths:
                 - stAddress
                 - city
                 - postCode
-  /api/user/bookings/{userId}:
-    get:
-      summary: List all of a user's bookings
-      description: List all of a given user id's bookings
-      tags:
-        - User
-      responses:
-        "200":
-          description: These are this user's bookings
-      parameters:
-        - in: path
-          name: userId
-          description: User's ObjectId in db
-          required: true
-          schema:
-            type: string
   /api/pro:
     post:
       summary: Create a single pro
@@ -181,3 +165,35 @@ paths:
                 - bookingDate
                 - startSession
                 - endSession
+  /api/bookings/pro/{proId}:
+    get:
+      summary: List all bookings of a given proId
+      description: List all bookings of a given proId
+      tags:
+        - Booking
+      responses:
+        "200":
+          description: These are all the bookings of this pro
+      parameters:
+        - in: path
+          name: proId
+          description: Pro's ObjectId in db
+          required: true
+          schema:
+            type: string
+  /api/bookings/user/{userId}:
+    get:
+      summary: List all of a user's bookings
+      description: List all of a given user id's bookings
+      tags:
+        - Booking
+      responses:
+        "200":
+          description: These are this user's bookings
+      parameters:
+        - in: path
+          name: userId
+          description: User's ObjectId in db
+          required: true
+          schema:
+            type: string

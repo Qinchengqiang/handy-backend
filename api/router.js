@@ -33,15 +33,6 @@ router.post("/api/user", async (ctx) => {
     };
   } catch (e) {}
 });
-//List all the bookings of a user:
-router.get("/api/user/bookings/:userId", async (ctx) => {
-  const { userId } = ctx.params;
-  //console.log("id is " + id);
-  const res = User.findOne({
-    _id: new mongoose.Types.ObjectId(userId),
-  }).populate({ path: "bookings" });
-  ctx.body = await res.then((data) => data);
-});
 
 /** API for Pro model
  *
@@ -78,6 +69,15 @@ router.get("/api/pro/:type/:date", async (ctx) => {
   let { type, date } = ctx.params;
   date = new Date(date);
 });
+//List all bookings of a given proId
+/* router.get("/api/pro/:proId/bookings", async (ctx) => {
+  const { proId } = ctx.params;
+  console.log(proId);
+  const res = Pro.findOne({
+    _id: new mongoose.Types.ObjectId(proId),
+  }).populate({ path: "bookings" });
+  ctx.body = await res.then((data) => data);
+}); */
 
 /** API for Booking model
  *  For simplicity sake, our handy.com clone only supports same date
@@ -131,6 +131,24 @@ router.post("/api/booking", async (ctx) => {
     };
   } catch (e) {}
 });
-//
+//list all bookings of a given proId
+router.get("/api/bookings/pro/:id", async (ctx) => {
+  console.log(ctx.params);
+  const { id } = ctx.params;
+  //console.log("id is " + id);
+  const res = Pro.findOne({
+    _id: new mongoose.Types.ObjectId(id),
+  }).populate({ path: "bookings" });
+  ctx.body = await res.then((data) => data);
+});
+//List all the bookings of a given userId:
+router.get("/api/bookings/user/:id", async (ctx) => {
+  const { id } = ctx.params;
+  //console.log("id is " + id);
+  const res = User.findOne({
+    _id: new mongoose.Types.ObjectId(id),
+  }).populate({ path: "bookings" });
+  ctx.body = await res.then((data) => data);
+});
 
 module.exports = router;
