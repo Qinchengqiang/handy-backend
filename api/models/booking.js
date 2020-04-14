@@ -11,8 +11,12 @@ const BookingSchema = Schema({
   bookingDate: { type: Date, required: true },
   startSession: { type: Number, required: true, min: 1, max: 29 },
   endSession: { type: Number, required: true, min: 1, max: 29 },
+  status: { type: String, required: true, default: "upcoming" },
+  timeCreated: { type: Date, required: true, default: Date.now },
+  lastModified: { type: Date, required: true },
   notes: { type: String, trim: true },
   feedback: { type: String, trim: true },
+  rating: { type: Number, min: 1, max: 5 },
 });
 
 module.exports = BookingSchema;

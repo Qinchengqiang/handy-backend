@@ -17,7 +17,7 @@ const router = new Router();
 
 /** API for User Model
  * * Please add comment at the beginning of your code block
- * * Plsease follow the CRUD order for each section
+ * * Please follow the CRUD order for each section
  *
  */
 // Create a User
@@ -32,6 +32,19 @@ router.post("/api/user", async (ctx) => {
       id: res._id,
     };
   } catch (e) {}
+});
+//Read
+//list a given userId's basic info excluding upcoming bookings and orders
+router.get("/api/user/:id", async (ctx) => {
+  const { id } = ctx.params;
+  const res = await User.findById(id, (err, data) => {
+    if (err) {
+      console.error(err);
+    }
+    return data;
+  });
+  ctx.status = 200;
+  ctx.body = res;
 });
 
 /** API for Pro model
@@ -64,27 +77,37 @@ router.post("/api/pro", async (ctx) => {
     };
   } catch (e) {}
 });
-//List all available pros with matching service type and time
+//Read
+//List a given proId's account info and availability:
+router.get("/api/pro/:id", async (ctx) => {
+  const { id } = ctx.params;
+  await Pro.findById(id, (err, data) => {
+    if (err) {
+      console.error(err);
+      ctx.status = 404;
+    }
+    ctx.status = 200;
+    ctx.body = {
+      message: "success",
+      data,
+    };
+  });
+});
+
+/**
+ * TODO List all available pros with matching service type and time
 router.get("/api/pro/:type/:date", async (ctx) => {
   let { type, date } = ctx.params;
   date = new Date(date);
 });
-//List all bookings of a given proId
-/* router.get("/api/pro/:proId/bookings", async (ctx) => {
-  const { proId } = ctx.params;
-  console.log(proId);
-  const res = Pro.findOne({
-    _id: new mongoose.Types.ObjectId(proId),
-  }).populate({ path: "bookings" });
-  ctx.body = await res.then((data) => data);
-}); */
 
 /** API for Booking model
  *  For simplicity sake, our handy.com clone only supports same date
  * booking, meaning the user can only book a job lasts less than 29
  * time sessions
  */
-//Create a Booking
+//Create
+//Create a new booking
 router.post("/api/booking", async (ctx) => {
   try {
     const body = ctx.request.body;
@@ -94,15 +117,6 @@ router.post("/api/booking", async (ctx) => {
     /**
      * TODO validate against pro's availability, then update pro's availability
      */
-    /* const proAvail = Pro.findOne(
-      {
-            _id: proId,
-            availability: [{
-              
-          }]
-      },
-      {}
-    ); */
     const bookingPayload = {
       ...body,
       customerId: customerId,
@@ -131,6 +145,7 @@ router.post("/api/booking", async (ctx) => {
     };
   } catch (e) {}
 });
+//Read
 //list all bookings of a given proId
 router.get("/api/bookings/pro/:id", async (ctx) => {
   console.log(ctx.params);
@@ -149,6 +164,34 @@ router.get("/api/bookings/user/:id", async (ctx) => {
     _id: new mongoose.Types.ObjectId(id),
   }).populate({ path: "bookings" });
   ctx.body = await res.then((data) => data);
+});
+//Update
+//Add rating and feedback:
+router.put("/api/booking", async (ctx) => {
+  const payload = ctx.request.body;
+  await Booking.findOneAndUpdate(
+    {
+      _id: new mongoose.Types.ObjectId(payload.bookingId),
+    },
+    {
+      $set: {
+        feedback: payload.feedback,
+        rating: payload.rating,
+        status: payload.status,
+      },
+    },
+    (err, data) => {
+      if (err) {
+        console.error(err);
+        ctx.status = 500;
+        ctx.body = {
+          message: "Internal error, please try again",
+        };
+      }
+      console.log(data);
+      ctx.status = 201;
+    }
+  );
 });
 
 module.exports = router;
