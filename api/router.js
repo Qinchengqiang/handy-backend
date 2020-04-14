@@ -55,15 +55,15 @@ router.get("/api/user/:id", async (ctx) => {
 router.post("/api/pro", async (ctx) => {
   try {
     const body = ctx.request.body;
-    const convertedAvail = body.availability.map((item) => ({
+    /* const convertedAvail = body.availability.map((item) => ({
       startDate: new Date(item.startDate),
       startSession: item.startSession,
       endDate: new Date(item.endDate),
       endSession: item.endSession,
-    }));
+    })); */
     const proPayload = {
       ...body,
-      availability: [...convertedAvail],
+      //availability: [...convertedAvail],
     };
 
     console.log("request body" + JSON.stringify(proPayload));
@@ -93,12 +93,35 @@ router.get("/api/pro/:id", async (ctx) => {
     };
   });
 });
-
-/**
- * TODO List all available pros with matching service type and time
-router.get("/api/pro/:type/:date", async (ctx) => {
-  let { type, date } = ctx.params;
-  date = new Date(date);
+//show all matching available pros:
+router.post("/api/pro/avail", async (ctx) => {
+  const {
+    serviceType,
+    bookingDate,
+    startSession,
+    endSession,
+  } = ctx.request.body;
+  //const date = new Date(bookingDate);
+  const start = Number.parseInt(startSession, 10);
+  const end = Number.parseInt(endSession, 10);
+  //console.log(`${date},${start},${end}`);
+  const res = await Pro.find(
+    {
+      serviceType: serviceType,
+      "availability.startDate": { $lte: bookingDate },
+      "availability.startSession": { $lte: start },
+      "availability.endDate": { $gte: bookingDate },
+      "availability.endSession": { $gte: end },
+    },
+    (err, data) => {
+      if (err) {
+        console.error(err);
+      }
+      return data;
+    }
+  );
+  ctx.status = 200;
+  ctx.body = res;
 });
 
 /** API for Booking model
@@ -117,6 +140,7 @@ router.post("/api/booking", async (ctx) => {
     /**
      * TODO validate against pro's availability, then update pro's availability
      */
+
     const bookingPayload = {
       ...body,
       customerId: customerId,
@@ -165,6 +189,7 @@ router.get("/api/bookings/user/:id", async (ctx) => {
   }).populate({ path: "bookings" });
   ctx.body = await res.then((data) => data);
 });
+
 //Update
 //Add rating and feedback:
 router.put("/api/booking", async (ctx) => {
