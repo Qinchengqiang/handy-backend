@@ -14,6 +14,11 @@ const GoodsItem = mongoose.model("GoodsItem", GoodsItemSchema);
 const Order = mongoose.model("Order", OrderSchema);
 
 const router = new Router();
+/**
+ * TODO aggregate and calculate a pro's rating when user submit feedback
+ * TODO finish make a booking logic
+ *
+ */
 
 /** API for User Model
  * * Please add comment at the beginning of your code block
@@ -101,10 +106,8 @@ router.post("/api/pro/avail", async (ctx) => {
     startSession,
     endSession,
   } = ctx.request.body;
-  //const date = new Date(bookingDate);
   const start = Number.parseInt(startSession, 10);
   const end = Number.parseInt(endSession, 10);
-  //console.log(`${date},${start},${end}`);
   const res = await Pro.find(
     {
       serviceType: serviceType,
@@ -113,6 +116,21 @@ router.post("/api/pro/avail", async (ctx) => {
       "availability.endDate": { $gte: bookingDate },
       "availability.endSession": { $gte: end },
     },
+    {
+      _id: 1,
+      firstName: 1,
+      serviceType: 1,
+      //availability: 1,
+      availability: {
+        $elemMatch: {
+          startDate: { $lte: bookingDate },
+          startSession: { $lte: start },
+          endDate: { $gte: bookingDate },
+          endSession: { $gte: end },
+        },
+      },
+    },
+
     (err, data) => {
       if (err) {
         console.error(err);
@@ -122,6 +140,32 @@ router.post("/api/pro/avail", async (ctx) => {
   );
   ctx.status = 200;
   ctx.body = res;
+});
+//Update
+//Update a pro's availability
+router.put("/api/pro/:id/avail", async (ctx) => {
+  const { id } = ctx.params;
+  const newAvail = ctx.request.body;
+  console.log(newAvail);
+  const res = await Pro.findOneAndUpdate(
+    {
+      _id: new mongoose.Types.ObjectId(id),
+    },
+    {
+      $set: { availability: newAvail },
+    },
+    (err, data) => {
+      if (err) {
+        console.error(err);
+      }
+      return data;
+    }
+  );
+  ctx.status = 201;
+  ctx.body = {
+    message: "successfully updated the availability",
+    data: res,
+  };
 });
 
 /** API for Booking model
@@ -134,18 +178,145 @@ router.post("/api/pro/avail", async (ctx) => {
 router.post("/api/booking", async (ctx) => {
   try {
     const body = ctx.request.body;
+    const notes = body.notes;
     const proId = new mongoose.Types.ObjectId(body.proId);
     const customerId = new mongoose.Types.ObjectId(body.customerId);
-    const bookingDate = new Date(body.bookingDate);
-    /**
-     * TODO validate against pro's availability, then update pro's availability
-     */
+    const serviceType = body.serviceType;
+    const bookingDate = body.bookingDate;
+    const start = body.startSession;
+    const end = body.endSession;
+
+    //step 1: validate request against availability in db
+    const validateRes = await Pro.find(
+      {
+        _id: proId,
+        //serviceType: serviceType,
+        "availability.startDate": { $lte: bookingDate },
+        "availability.startSession": { $lte: start },
+        "availability.endDate": { $gte: bookingDate },
+        "availability.endSession": { $gte: end },
+      },
+      {
+        availability: {
+          $elemMatch: {
+            startDate: { $lte: bookingDate },
+            startSession: { $lte: start },
+            endDate: { $gte: bookingDate },
+            endSession: { $gte: end },
+          },
+        },
+      },
+      (err, doc) => {
+        if (err) {
+          console.error(err);
+        }
+        return doc;
+      }
+    );
+    //console.log(`validate Res==${validateRes}`);
+
+    if (validateRes.length == 0) {
+      throw "error when retrieving matched availability's objectId";
+    }
+    //step 2: update corresponding pro's availability
+    const {
+      _id: oldId,
+      startDate: oldStartDate,
+      startSession: oldStartSession,
+      endDate: oldEndDate,
+      endSession: oldEndSession,
+    } = validateRes[0].availability[0];
+
+    const deleteAvailRes = await Pro.findOneAndUpdate(
+      {
+        _id: proId,
+      },
+      {
+        $pull: {
+          availability: {
+            _id: oldId,
+          },
+        },
+      },
+      (err, data) => {
+        if (err) {
+          throw err;
+        }
+        return data;
+      }
+    );
+    //console.log(deleteAvailRes);
+    console.log("successfully pulled the old availability");
+    //step 2a: constructing two new availabilities docs:
+    const newAvailHead = {
+      startDate: oldStartDate,
+      startSession: oldStartSession,
+      endDate: new Date(bookingDate),
+      endSession: start - 1, //haven't consider 0
+    };
+    const newAvailTail = {
+      startDate: new Date(bookingDate),
+      startSession: end + 1, //haven't consider 30
+      endDate: oldEndDate,
+      endSession: oldEndSession,
+    };
+
+    let availPayload = [];
+    //step 2b: handel three exceptions:
+
+    /* let headStartDate = new Date(newAvailHead.startDate);
+    let headEndDate = new Date(newAvailHead.endDate);
+    let tailStartDate = new Date(newAvailTail.startDate);
+    let tailEndDate = new Date(newAvailTail.endDate); */
+    if (
+      newAvailHead.startDate.valueOf() == newAvailHead.endDate.valueOf() &&
+      newAvailHead.startSession == newAvailHead.endSession &&
+      newAvailTail.startDate.valueOf() == newAvailTail.endDate.valueOf() &&
+      newAvailTail.startSession == newAvailTail.endSession
+    ) {
+      availPayload = [];
+    } else if (
+      newAvailHead.startDate.valueOf() == newAvailHead.endDate.valueOf() &&
+      newAvailHead.startSession == newAvailHead.endSession &&
+      (newAvailTail.startDate.valueOf() != newAvailTail.endDate.valueOf() ||
+        newAvailTail.startSession != newAvailTail.endSession)
+    ) {
+      availPayload = [newAvailTail];
+    } else if (
+      (newAvailHead.startDate.valueOf() != newAvailHead.endDate.valueOf() ||
+        newAvailHead.startSession != newAvailHead.endSession) &&
+      newAvailTail.startDate.valueOf() == newAvailTail.endDate.valueOf() &&
+      newAvailTail.startSession == newAvailTail.endSession
+    ) {
+      availPayload = [newAvailHead];
+    } else {
+      availPayload = [newAvailHead, newAvailTail];
+    }
+    console.log(availPayload);
+    //step 3, push availPayload to db
+    const updateAvailRes = await Pro.findOneAndUpdate(
+      {
+        _id: proId,
+      },
+      {
+        $addToSet: { availability: availPayload },
+      },
+      (err, data) => {
+        if (err) {
+          throw err;
+        }
+        return data;
+      }
+    );
+    console.log(`update Avail completed`);
 
     const bookingPayload = {
-      ...body,
-      customerId: customerId,
-      proId: proId,
+      notes,
+      customerId,
+      proId,
       bookingDate,
+      startSession: start,
+      endSession: end,
     };
     const newBooking = new Booking(bookingPayload);
     const res = await newBooking.save();
@@ -167,7 +338,9 @@ router.post("/api/booking", async (ctx) => {
       message: "a booking has been created successfully",
       id: res._id,
     };
-  } catch (e) {}
+  } catch (e) {
+    console.error(e);
+  }
 });
 //Read
 //list all bookings of a given proId

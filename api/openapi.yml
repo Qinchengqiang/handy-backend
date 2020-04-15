@@ -187,6 +187,43 @@ paths:
                 endSession:
                   type: integer
                   format: int32
+  /api/pro/{proId}/avail:
+    put:
+      summary: update a given pro's availability
+      description: query a given proId and update its availability
+      tags:
+        - Pro
+      responses:
+        "201":
+          description: successfully updated the availability
+      parameters:
+        - in: path
+          name: proId
+          description: pro's ObjectId in db
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  startDate:
+                    type: string
+                    format: date
+                  startSession:
+                    type: integer
+                    format: int32
+                  endDate:
+                    type: string
+                    format: date
+                  endSession:
+                    type: integer
+                    format: int32
+
   /api/booking:
     post:
       summary: create a single booking
@@ -214,8 +251,6 @@ paths:
                 endSession:
                   type: number
                 notes:
-                  type: string
-                feedback:
                   type: string
               required:
                 - customerId
