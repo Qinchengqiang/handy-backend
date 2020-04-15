@@ -111,14 +111,6 @@ paths:
                   type: string
                 postCode:
                   type: string
-                bookings:
-                  type: array
-                  items:
-                    type: string
-                orders:
-                  type: array
-                  items:
-                    type: string
                 serviceType:
                   type: string
                 availability:
