@@ -12,19 +12,41 @@ mongoose.connect(config.db.uri, config.db.options);
 const app = new Koa();
 
 app.use(
-  oas({
-    endpoint: "/openapi.json",
-    file: path.resolve(process.cwd(), "./api", "openapi.yml"),
-    uiEndpoint: "/oas",
-    validatePaths: ["/else"],
-  })
+	oas({
+		endpoint: "/openapi.json",
+		file: path.resolve(process.cwd(), "./api", "openapi.yml"),
+		uiEndpoint: "/oas",
+		validatePaths: ["/else"],
+	})
 );
 
 const corsOptions = {
-  allowMethods: "GET,POST,PUT",
+	allowMethods: "GET,POST,PUT",
 };
 
 app.use(cors(corsOptions));
 app.use(bodyParser());
+
+// session
+const convert = require("koa-convert");
+const session = require("koa-generic-session");
+const MongoStore = require("koa-generic-session-mongo");
+
+app.keys = ["your-session-secret", "another-session-secret"];
+app.use(
+	convert(
+		session({
+			store: new MongoStore(),
+		})
+	)
+);
+
+// authentication
+const passport = require("koa-passport");
+require("./api/auth");
+app.use(passport.initialize());
+
+app.use(passport.session());
+
 app.use(router.routes());
 app.listen(4000);

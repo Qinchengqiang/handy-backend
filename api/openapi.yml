@@ -62,6 +62,33 @@ paths:
                 - stAddress
                 - city
                 - postCode
+  /api/login:
+    post:
+      summary: User Log in
+      description: Log the user into website
+      tags:
+        - Login
+      responses:
+        "201":
+          description: Login success!
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+
+                pwd:
+                  type: string
+                  format: password
+
+              required:
+                - email
+                - pwd
+
   /api/user/{userId}:
     get:
       summary: Fetch a given userId's basic info
