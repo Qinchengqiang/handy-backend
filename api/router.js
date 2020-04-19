@@ -82,7 +82,7 @@ router.post("/api/login", async (ctx, next) => {
 				console.log(compare);
 				if (compare) {
 					console.log(1);
-
+					ctx.status = 201;
 					ctx.body = {
 						message: "Login successfully!",
 						token: jsonwebtoken.sign(
@@ -94,6 +94,7 @@ router.post("/api/login", async (ctx, next) => {
 						),
 					};
 				} else {
+					ctx.status = 403;
 					ctx.body = {
 						message: "Password is not correct!",
 					};
