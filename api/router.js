@@ -7,6 +7,7 @@ const OrderSchema = require("./models/order");
 const ProSchema = require("./models/pro");
 const UserSchema = require("./models/user");
 const bcrypt = require("bcryptjs");
+const jsonwebtoken = require("jsonwebtoken");
 const passport = require("koa-passport");
 const initializePassport = require("./auth");
 const User = mongoose.model("User", UserSchema);
@@ -66,23 +67,40 @@ router.post("/api/user", async (ctx) => {
 });
 
 // User login
-router.post("/api/login", async (ctx) => {
-	return passport.authenticate(
-		"local",
-		function (user, info, status) {
-			if (user === false) {
-				ctx.status = 401;
-				ctx.body = { success: false };
-			} else {
-				ctx.body = { success: true };
-				return ctx.login(user);
-			}
-		},
-		{
-			successRedirect: "/homepage",
-			failureRedirect: "/api/login",
+router.post("/api/login", async (ctx, next) => {
+	await User.findOne({ email: ctx.request.body.email }).then((user) => {
+		if (!user) {
+			console.log("not reg");
+			ctx.body = {
+				message: "Username does not exist!",
+			};
+			return;
+		} else {
+			bcrypt.compare(ctx.request.body.pwd, user.pwd).then((compare) => {
+				console.log(user.pwd);
+				console.log(ctx.request.body.pwd);
+				console.log(compare);
+				if (compare) {
+					console.log(1);
+
+					ctx.body = {
+						message: "Login successfully!",
+						token: jsonwebtoken.sign(
+							{
+								data: user.email,
+								exp: Math.floor(Date.now() / 1000) + 60 * 60,
+							},
+							"secret"
+						),
+					};
+				} else {
+					ctx.body = {
+						message: "Password is not correct!",
+					};
+				}
+			});
 		}
-	);
+	});
 });
 
 //Read

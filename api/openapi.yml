@@ -71,6 +71,8 @@ paths:
       responses:
         "201":
           description: Login success!
+        "400":
+          description: Password is not correct!
       requestBody:
         content:
           application/json:
