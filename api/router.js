@@ -70,8 +70,7 @@ router.post("/api/user", async (ctx) => {
 router.post("/api/login", async (ctx, next) => {
 	await User.findOne({ email: ctx.request.body.email }).then(async (user) => {
 		if (!user) {
-			console.log("not reg");
-			console.log(user);
+			ctx.status = 401;
 			ctx.body = {
 				message: "Username does not exist!",
 			};
@@ -79,15 +78,12 @@ router.post("/api/login", async (ctx, next) => {
 			return;
 		} else {
 			await bcrypt.compare(ctx.request.body.pwd, user.pwd).then((compare) => {
-				console.log(user.pwd);
-				console.log(ctx.request.body.pwd);
-				console.log(compare);
 				if (!compare) {
-					ctx.status = 403;
+					ctx.status = 401;
 					ctx.body = {
 						message: "Password is not correct!",
 					};
-					console.log(1);
+
 					return;
 				} else {
 					ctx.status = 201;
@@ -101,7 +97,6 @@ router.post("/api/login", async (ctx, next) => {
 							"secret"
 						),
 					};
-					console.log(2);
 				}
 			});
 		}
