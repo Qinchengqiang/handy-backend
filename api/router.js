@@ -9,7 +9,7 @@ const UserSchema = require("./models/user");
 const bcrypt = require("bcryptjs");
 const jsonwebtoken = require("jsonwebtoken");
 const passport = require("koa-passport");
-const initializePassport = require("./auth");
+
 const User = mongoose.model("User", UserSchema);
 const Pro = mongoose.model("Pro", ProSchema);
 const Booking = mongoose.model("Booking", BookingSchema);
@@ -68,20 +68,28 @@ router.post("/api/user", async (ctx) => {
 
 // User login
 router.post("/api/login", async (ctx, next) => {
-	await User.findOne({ email: ctx.request.body.email }).then((user) => {
+	await User.findOne({ email: ctx.request.body.email }).then(async (user) => {
 		if (!user) {
 			console.log("not reg");
+			console.log(user);
 			ctx.body = {
 				message: "Username does not exist!",
 			};
+
 			return;
 		} else {
-			bcrypt.compare(ctx.request.body.pwd, user.pwd).then((compare) => {
+			await bcrypt.compare(ctx.request.body.pwd, user.pwd).then((compare) => {
 				console.log(user.pwd);
 				console.log(ctx.request.body.pwd);
 				console.log(compare);
-				if (compare) {
+				if (!compare) {
+					ctx.status = 403;
+					ctx.body = {
+						message: "Password is not correct!",
+					};
 					console.log(1);
+					return;
+				} else {
 					ctx.status = 201;
 					ctx.body = {
 						message: "Login successfully!",
@@ -93,11 +101,7 @@ router.post("/api/login", async (ctx, next) => {
 							"secret"
 						),
 					};
-				} else {
-					ctx.status = 403;
-					ctx.body = {
-						message: "Password is not correct!",
-					};
+					console.log(2);
 				}
 			});
 		}
