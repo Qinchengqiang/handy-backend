@@ -6,6 +6,9 @@ const GoodsItemSchema = require("./models/goodsitem");
 const OrderSchema = require("./models/order");
 const ProSchema = require("./models/pro");
 const UserSchema = require("./models/user");
+const bcrypt = require("bcryptjs");
+const jsonwebtoken = require("jsonwebtoken");
+const passport = require("koa-passport");
 
 const User = mongoose.model("User", UserSchema);
 const Pro = mongoose.model("Pro", ProSchema);
@@ -14,6 +17,7 @@ const GoodsItem = mongoose.model("GoodsItem", GoodsItemSchema);
 const Order = mongoose.model("Order", OrderSchema);
 
 const router = new Router();
+
 /**
  * TODO aggregate and calculate a pro's rating when user submit feedback
  * TODO finish make a booking logic
@@ -30,14 +34,77 @@ router.post("/api/user", async (ctx) => {
   try {
     const body = ctx.request.body;
     const newUser = new User(body);
-    const res = await newUser.save();
-    ctx.status = 201;
-    ctx.body = {
-      message: "new user has been created successfully",
-      id: res._id,
-    };
+
+    //check if email address has already been used.
+    await User.findOne({ email: body.email }).then((user) => {
+      if (user) {
+        //user exist
+        console.log(1);
+        ctx.status = 403;
+        ctx.body = {
+          message: "The username is already existed",
+        };
+        return;
+      }
+      // Hash password
+      bcrypt.genSalt(10, (err, salt) =>
+        bcrypt.hash(newUser.password, salt, (err, hash) => {
+          if (err) throw err;
+          //Set password to hash
+          newUser.password = hash;
+          console.log(newUser.password);
+          //save user
+          newUser.save();
+        })
+      );
+      ctx.status = 201;
+      ctx.body = {
+        message: "new user has been created successfully",
+        id: newUser.save()._id,
+      };
+    });
   } catch (e) {}
 });
+
+// User login
+router.post("/api/login", async (ctx, next) => {
+  await User.findOne({ email: ctx.request.body.email }).then(async (user) => {
+    if (!user) {
+      ctx.status = 401;
+      ctx.body = {
+        message: "Username does not exist!",
+      };
+
+      return;
+    } else {
+      await bcrypt
+        .compare(ctx.request.body.password, user.password)
+        .then((compare) => {
+          if (!compare) {
+            ctx.status = 401;
+            ctx.body = {
+              message: "Password is not correct!",
+            };
+
+            return;
+          } else {
+            ctx.status = 201;
+            ctx.body = {
+              message: "Login successfully!",
+              token: jsonwebtoken.sign(
+                {
+                  data: user.email,
+                  exp: Math.floor(Date.now() / 1000) + 60 * 60,
+                },
+                "secret"
+              ),
+            };
+          }
+        });
+    }
+  });
+});
+
 //Read
 //list a given userId's basic info excluding upcoming bookings and orders
 router.get("/api/user/:id", async (ctx) => {

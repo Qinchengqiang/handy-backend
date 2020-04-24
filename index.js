@@ -7,24 +7,30 @@ const bodyParser = require("koa-bodyparser");
 const config = require("./api/config");
 const router = require("./api/router");
 const cors = require("@koa/cors");
+const jwt = require("koa-jwt");
 
 mongoose.connect(config.db.uri, config.db.options);
 const app = new Koa();
 
 app.use(
-  oas({
-    endpoint: "/openapi.json",
-    file: path.resolve(process.cwd(), "./api", "openapi.yml"),
-    uiEndpoint: "/oas",
-    validatePaths: ["/else"],
-  })
+	oas({
+		endpoint: "/openapi.json",
+		file: path.resolve(process.cwd(), "./api", "openapi.yml"),
+		uiEndpoint: "/oas",
+		validatePaths: ["/else"],
+	})
 );
 
 const corsOptions = {
-  allowMethods: "GET,POST,PUT",
+	allowMethods: "GET,POST,PUT",
 };
 
 app.use(cors(corsOptions));
 app.use(bodyParser());
+
+// koa-jwt authentication
+
+// app.use(jwt({ secret: "secret" }).unless({ path: [/\/register/, /\/login/] }));
+
 app.use(router.routes());
 app.listen(4000);
