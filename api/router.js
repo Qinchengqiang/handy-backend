@@ -424,9 +424,12 @@ router.get("/api/bookings/pro/:id", async (ctx) => {
 router.get("/api/bookings/user/:id", async (ctx) => {
 	const { id } = ctx.params;
 	//console.log("id is " + id);
-	const res = User.findOne({
-		_id: new mongoose.Types.ObjectId(id),
-	}).populate({ path: "bookings" });
+	const res = User.findOne(
+		{
+			_id: new mongoose.Types.ObjectId(id),
+		},
+		{ pwd: 0, orders: 0 }
+	).populate({ path: "bookings" });
 	ctx.body = await res.then((data) => data);
 });
 
