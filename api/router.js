@@ -48,11 +48,11 @@ router.post("/api/user", async (ctx) => {
 			}
 			// Hash password
 			bcrypt.genSalt(10, (err, salt) =>
-				bcrypt.hash(newUser.pwd, salt, (err, hash) => {
+				bcrypt.hash(newUser.password, salt, (err, hash) => {
 					if (err) throw err;
 					//Set password to hash
-					newUser.pwd = hash;
-					console.log(newUser.pwd);
+					newUser.password = hash;
+					console.log(newUser.password);
 					//save user
 					newUser.save();
 				})
@@ -77,28 +77,30 @@ router.post("/api/login", async (ctx, next) => {
 
 			return;
 		} else {
-			await bcrypt.compare(ctx.request.body.pwd, user.pwd).then((compare) => {
-				if (!compare) {
-					ctx.status = 401;
-					ctx.body = {
-						message: "Password is not correct!",
-					};
+			await bcrypt
+				.compare(ctx.request.body.password, user.password)
+				.then((compare) => {
+					if (!compare) {
+						ctx.status = 401;
+						ctx.body = {
+							message: "Password is not correct!",
+						};
 
-					return;
-				} else {
-					ctx.status = 201;
-					ctx.body = {
-						message: "Login successfully!",
-						token: jsonwebtoken.sign(
-							{
-								data: user.email,
-								exp: Math.floor(Date.now() / 1000) + 60 * 60,
-							},
-							"secret"
-						),
-					};
-				}
-			});
+						return;
+					} else {
+						ctx.status = 201;
+						ctx.body = {
+							message: "Login successfully!",
+							token: jsonwebtoken.sign(
+								{
+									data: user.email,
+									exp: Math.floor(Date.now() / 1000) + 60 * 60,
+								},
+								"secret"
+							),
+						};
+					}
+				});
 		}
 	});
 });

@@ -83,7 +83,7 @@ paths:
                   type: string
                   format: email
 
-                pwd:
+                password:
                   type: string
                   format: password
 

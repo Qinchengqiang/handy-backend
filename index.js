@@ -30,7 +30,7 @@ app.use(bodyParser());
 
 // koa-jwt authentication
 
-app.use(jwt({ secret: "secret" }).unless({ path: [/\/register/, /\/login/] }));
+// app.use(jwt({ secret: "secret" }).unless({ path: [/\/register/, /\/login/] }));
 
 app.use(router.routes());
 app.listen(4000);
