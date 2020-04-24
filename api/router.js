@@ -111,16 +111,6 @@ router.post("/api/pro/avail", async (ctx) => {
   const res = await Pro.find(
     {
       serviceType: serviceType,
-      "availability.startDate": { $lte: bookingDate },
-      "availability.startSession": { $lte: start },
-      "availability.endDate": { $gte: bookingDate },
-      "availability.endSession": { $gte: end },
-    },
-    {
-      _id: 1,
-      firstName: 1,
-      serviceType: 1,
-      //availability: 1,
       availability: {
         $elemMatch: {
           startDate: { $lte: bookingDate },
@@ -129,6 +119,24 @@ router.post("/api/pro/avail", async (ctx) => {
           endSession: { $gte: end },
         },
       },
+      /* "availability.startDate": { $lte: bookingDate },
+      "availability.startSession": { $lte: start },
+      "availability.endDate": { $gte: bookingDate },
+      "availability.endSession": { $gte: end }, */
+    },
+    {
+      _id: 1,
+      firstName: 1,
+      serviceType: 1,
+      /* availability: 1,
+      availability: {
+        $elemMatch: {
+          startDate: { $lte: bookingDate },
+          startSession: { $lte: start },
+          endDate: { $gte: bookingDate },
+          endSession: { $gte: end },
+        },
+      }, */
     },
 
     (err, data) => {
@@ -357,9 +365,12 @@ router.get("/api/bookings/pro/:id", async (ctx) => {
 router.get("/api/bookings/user/:id", async (ctx) => {
   const { id } = ctx.params;
   //console.log("id is " + id);
-  const res = User.findOne({
-    _id: new mongoose.Types.ObjectId(id),
-  },{pwd:0, orders:0}).populate({ path: "bookings" });
+  const res = User.findOne(
+    {
+      _id: new mongoose.Types.ObjectId(id),
+    },
+    { pwd: 0, orders: 0 }
+  ).populate({ path: "bookings" });
   ctx.body = await res.then((data) => data);
 });
 
