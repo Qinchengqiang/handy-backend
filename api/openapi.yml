@@ -31,12 +31,14 @@ paths:
                   type: string
                 lastName:
                   type: string
+                nickname:
+                  type: string
                 email:
                   type: string
                   format: email
                 contactNum:
                   type: string
-                pwd:
+                password:
                   type: string
                   format: password
                 stAddress:
