@@ -8,7 +8,7 @@ const ProSchema = require("./models/pro");
 const UserSchema = require("./models/user");
 const bcrypt = require("bcryptjs");
 const jsonwebtoken = require("jsonwebtoken");
-const passport = require("koa-passport");
+// const passport = require("koa-passport");
 
 const User = mongoose.model("User", UserSchema);
 const Pro = mongoose.model("Pro", ProSchema);
