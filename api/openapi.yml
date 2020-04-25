@@ -341,3 +341,24 @@ paths:
           required: true
           schema:
             type: string
+  /api/wishList/{id}:
+    post:
+      summary: change all a user's shopping cart
+      description: change all a user's shopping cart
+      tags:
+        - wishList
+      parameters:
+        - in: path
+          name: id
+          description: id of user
+          required: true
+          schema:
+            type: string
+      responses:
+        "201":
+          description: changed wishlist
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object

@@ -479,4 +479,23 @@ router.put("/api/booking", async (ctx) => {
 	);
 });
 
+router.post('/api/wishlist/:id',async(ctx)=>{
+	const {id } = ctx.params;
+	await User.setWishlist(id,ctx.request.body.wishList)
+			.then(data=>{
+				ctx.status=201;
+				ctx.body={
+					message: "changed wishlist"
+				}
+			})
+			.catch(err=>{
+				ctx.status=400;
+				ctx.body={
+					message: `${err} error occured`
+				}
+			})
+})
+
+
+
 module.exports = router;
