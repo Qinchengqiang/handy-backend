@@ -362,3 +362,24 @@ paths:
           application/json:
             schema:
               type: object
+  /api/orderHistory/{id}:
+    post:
+      summary: changed a user's orderHistory
+      description: change all a user's orderHistory
+      tags:
+        - orderHistory
+      parameters:
+        - in: path
+          name: id
+          description: id of user
+          required: true
+          schema:
+            type: string
+      responses:
+        "201":
+          description: changed orderHistory
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object

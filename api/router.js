@@ -497,5 +497,23 @@ router.post('/api/wishlist/:id',async(ctx)=>{
 })
 
 
+router.post('/api/orderHistory/:id',async(ctx)=>{
+	const {id } = ctx.params;
+	await User.setOrderHistory(id,ctx.request.body.orderHistory)
+			.then(data=>{
+				ctx.status=201;
+				ctx.body={
+					message: "changed orderHistory"
+				}
+			})
+			.catch(err=>{
+				ctx.status=405;
+				ctx.body={
+					message: `${err} error occured`
+				}
+			})
+})
+
+
 
 module.exports = router;
