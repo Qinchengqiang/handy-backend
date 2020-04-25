@@ -108,6 +108,82 @@ router.post("/api/login", async (ctx, next) => {
 	});
 });
 
+// update user info
+router.post("/api/user/update", async (ctx) => {
+	try {
+		const filter = { _id: ctx.request.body.id };
+		const body = ctx.request.body;
+
+		//update user info.
+		await User.findOneAndUpdate(filter, body).then((updatedInfo) => {
+			ctx.status = 201;
+			ctx.body = {
+				message: "Update successfully!",
+			};
+			console.log(updatedInfo);
+			return updatedInfo;
+		});
+	} catch (e) {
+		console.log(e);
+	}
+});
+
+// check user password
+
+router.post("/api/user/checkpwd", async (ctx, next) => {
+	await User.findOne({ _id: ctx.request.body.id }).then(async (user) => {
+		console.log(user);
+		await bcrypt
+			.compare(ctx.request.body.password, user.password)
+			.then((compare) => {
+				if (!compare) {
+					ctx.status = 401;
+					ctx.body = {
+						message: "Password is not correct!",
+					};
+
+					return;
+				} else {
+					ctx.status = 201;
+					ctx.body = {
+						message: "success!",
+					};
+				}
+			});
+	});
+});
+
+//update password
+
+router.post("/api/user/updatepwd", async (ctx) => {
+	try {
+		const filter = { _id: ctx.request.body.id };
+		const body = ctx.request.body;
+
+		//update user password.
+
+		bcrypt.genSalt(10, (err, salt) =>
+			bcrypt.hash(body.password, salt, (err, hash) => {
+				if (err) throw err;
+				//Set password to hash
+				body.password = hash;
+
+				User.findOneAndUpdate(filter, body).then((updatedPwd) => {
+					console.log(updatedPwd);
+				});
+			})
+		);
+		ctx.status = 201;
+		ctx.body = {
+			message: "Update successfully!",
+		};
+
+		console.log(body);
+	} catch (e) {
+		console.log(e);
+	}
+});
+
 //Read
 //list a given userId's basic info excluding upcoming bookings and orders
 router.get("/api/user/:id", async (ctx) => {

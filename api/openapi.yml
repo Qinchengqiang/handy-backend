@@ -64,6 +64,66 @@ paths:
                 - stAddress
                 - city
                 - postCode
+  /api/user/update:
+    post:
+      summary: update user info
+      description: update an existed user info in db.
+      tags:
+        - Update
+      responses:
+        "201":
+          description: User information updated successfully!
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                firstName:
+                  type: string
+                lastName:
+                  type: string
+                email:
+                  type: string
+                  format: email
+
+                number:
+                  type: string
+
+              required:
+                - id
+                - firstName
+                - lastName
+                - email
+                - number
+  /api/user/updatepwd:
+    post:
+      summary: update users password
+      description: update users password in DB.
+      tags:
+        - Update
+      responses:
+        "201":
+          description: password update successfully!
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+
+                password:
+                  type: string
+                  format: password
+
+              required:
+                - id
+                - password
+
   /api/login:
     post:
       summary: User Log in
@@ -91,6 +151,34 @@ paths:
 
               required:
                 - email
+                - pwd
+
+  /api/user/checkpwd:
+    post:
+      summary: Check password when update
+      description: Check password in my account page
+      tags:
+        - Check
+      responses:
+        "201":
+          description: success!
+        "401":
+          description: Password is not correct!
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+
+                password:
+                  type: string
+                  format: password
+
+              required:
+                - id
                 - pwd
 
   /api/user/{userId}:
