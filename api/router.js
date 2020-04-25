@@ -8,7 +8,7 @@ const ProSchema = require("./models/pro");
 const UserSchema = require("./models/user");
 const bcrypt = require("bcryptjs");
 const jsonwebtoken = require("jsonwebtoken");
-const passport = require("koa-passport");
+//const passport = require("koa-passport");
 
 const User = mongoose.model("User", UserSchema);
 const Pro = mongoose.model("Pro", ProSchema);
@@ -91,6 +91,7 @@ router.post("/api/login", async (ctx, next) => {
             ctx.status = 201;
             ctx.body = {
               message: "Login successfully!",
+              id: user._id,
               token: jsonwebtoken.sign(
                 {
                   data: user.email,
@@ -437,7 +438,13 @@ router.get("/api/bookings/user/:id", async (ctx) => {
       _id: new mongoose.Types.ObjectId(id),
     },
     { pwd: 0, orders: 0 }
-  ).populate({ path: "bookings" });
+  ).populate({
+    path: "bookings",
+    populate: {
+      path: "proId",
+      model: "Pro",
+    },
+  });
   ctx.body = await res.then((data) => data);
 });
 
