@@ -11,8 +11,24 @@ const UserSchema = Schema({
 	number: { type: String, required: true },
 	password: { type: String, required: true },
 	bookings: [{ type: Schema.Types.ObjectId, ref: "Booking" }],
+	wishlist:[],
+	orderHistory:[],
 	orders: [{ type: Schema.Types.ObjectId, ref: "Order" }],
 	nickname: { type: String, required: false },
 });
+
+UserSchema.statics.setWishlist = function(_id,wishlist){
+	return this.model("User")
+			.findByIdAndUpdate(_id,{$set:{wishlist}})
+			.exec()
+}
+
+UserSchema.statics.setOrderHistory = function(_id,orderHistory){
+	return this.model("User")
+			.findByIdAndUpdate(_id,{$set:{orderHistory}})
+			.exec()
+}
+
+
 
 module.exports = UserSchema;
