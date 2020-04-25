@@ -12,6 +12,7 @@ const UserSchema = Schema({
 	password: { type: String, required: true },
 	bookings: [{ type: Schema.Types.ObjectId, ref: "Booking" }],
 	orders: [{ type: Schema.Types.ObjectId, ref: "Order" }],
+	nickname: {type: String, required: false}
 });
 
 module.exports = UserSchema;
