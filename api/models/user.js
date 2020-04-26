@@ -17,15 +17,17 @@ const UserSchema = Schema({
 	nickname: { type: String, required: false },
 });
 
-UserSchema.statics.setWishlist = function(_id,wishlist){
+UserSchema.statics.setwishlist = function(_id,wishlist){
 	return this.model("User")
 			.findByIdAndUpdate(_id,{$set:{wishlist}})
 			.exec()
 }
 
 UserSchema.statics.setOrderHistory = function(_id,orderHistory){
+// 	var friend = {"firstName": req.body.fName, "lastName": req.body.lName};
+// Users.findOneAndUpdate({name: req.user.name}, {$push: {friends: friend}});
 	return this.model("User")
-			.findByIdAndUpdate(_id,{$set:{orderHistory}})
+			.findByIdAndUpdate(_id,{$push: {orderHistory: orderHistory}})
 			.exec()
 }
 

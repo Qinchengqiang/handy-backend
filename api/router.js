@@ -557,7 +557,7 @@ router.put("/api/booking", async (ctx) => {
 
 router.post('/api/wishlist/:id',async(ctx)=>{
 	const {id } = ctx.params;
-	await User.setWishlist(id,ctx.request.body.wishList)
+	await User.setwishlist(id,ctx.request.body.wishlist)
 			.then(data=>{
 				ctx.status=201;
 				ctx.body={
@@ -573,7 +573,7 @@ router.post('/api/wishlist/:id',async(ctx)=>{
 })
 
 
-router.post('/api/orderHistory/:id',async(ctx)=>{
+router.post('/api/orderhistory/:id',async(ctx)=>{
 	const {id } = ctx.params;
 	await User.setOrderHistory(id,ctx.request.body.orderHistory)
 			.then(data=>{

@@ -429,12 +429,12 @@ paths:
           required: true
           schema:
             type: string
-  /api/wishList/{id}:
+  /api/wishlist/{id}:
     post:
       summary: change all a user's shopping cart
       description: change all a user's shopping cart
       tags:
-        - wishList
+        - wishlist
       parameters:
         - in: path
           name: id
@@ -450,7 +450,7 @@ paths:
           application/json:
             schema:
               type: object
-  /api/orderHistory/{id}:
+  /api/orderhistory/{id}:
     post:
       summary: changed a user's orderHistory
       description: change all a user's orderHistory
